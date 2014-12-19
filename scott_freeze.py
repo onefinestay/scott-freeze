@@ -64,11 +64,16 @@ def tempdir():
         shutil.rmtree(path)
 
 
+def write_err(text):
+    sys.stderr.write(text)
+    sys.stderr.write('\n')
+
+
 def run_or_exit(cmd, verbose=False):
     proc = Popen(cmd, stdout=PIPE)
     proc.wait()
     if proc.returncode != 0:
-        print proc.stdout.read()
+        write_err(proc.stdout.read())
         sys.exit(1)
     output = proc.stdout.read()
 
@@ -112,7 +117,7 @@ def main():
     args = parse_cmdline()
 
     if not os.path.exists(args.requirements):
-        print 'No such file: {}'.format(args.requirements)
+        write_err('No such file: {}'.format(args.requirements))
         sys.exit(1)
 
     output = generate(args.requirements, args.python, args.verbose)
