@@ -5,7 +5,7 @@ Scott-freeze
 Keep ``requirements.in`` with unpinned or loosely pinned requirements, and
 let scott freeze them into ``requirements.txt`` for tests and deployment::
 
-    $cat requirements.in
+    $ cat requirements.in
     flask>0.9
 
 ::
@@ -30,3 +30,9 @@ let scott freeze them into ``requirements.txt`` for tests and deployment::
     MarkupSafe==0.23
     Werkzeug==0.9.6
 
+
+Version control
+---------------
+
+We recommend that you keep both ``requirements.in`` and ``requirements.txt``
+in your repo.
