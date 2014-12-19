@@ -104,13 +104,8 @@ def generate(req_file, python, verbose):
         pinned = run([pip_path, 'freeze']).splitlines()
         pinned = itertools.ifilterfalse(SKIP.match, pinned)
         pinned = sorted(pinned, key=lambda req: req.lower())
-        print HEADER
-        for line in index_url_lines:
-            print line
-        print
 
-        for req in pinned:
-            print req
+        return [HEADER] + index_url_lines + pinned
 
 
 def main():
@@ -120,7 +115,8 @@ def main():
         print 'No such file: {}'.format(args.requirements)
         sys.exit(1)
 
-    generate(args.requirements, args.python, args.verbose)
+    output = generate(args.requirements, args.python, args.verbose)
+    print '\n'.join(output)
 
 
 if __name__ == '__main__':
