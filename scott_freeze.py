@@ -26,8 +26,12 @@ HEADER = """# Generated file. Please do not edit manually
 SKIP = re.compile('^(argparse|distribute|wsgiref)==')
 
 
+class Abort(Exception):
+    pass
+
+
 class FakeFinder(object):
-    index_urls = None
+    index_urls = []
 
     def output(self):
         lines = []
@@ -40,7 +44,7 @@ class FakeFinder(object):
         return lines
 
 
-def parse_cmdline():
+def setup_argparse():
     parser = argparse.ArgumentParser(
         description='Generate a complete requirements file with all '
         'dependencies pinned')
@@ -51,6 +55,11 @@ def parse_cmdline():
         '--python', help='python interpreter for virtualenv to use')
     parser.add_argument(
         '--verbose', action='store_true', help='verbose output')
+    return parser
+
+
+def parse_cmdline():
+    parser = setup_argparse()
     args = parser.parse_args()
     return args
 
@@ -69,13 +78,13 @@ def write_err(text):
     sys.stderr.write('\n')
 
 
-def run_or_exit(cmd, verbose=False):
+def run_or_abort(cmd, verbose=False):
     proc = Popen(cmd, stdout=PIPE)
     proc.wait()
-    if proc.returncode != 0:
-        write_err(proc.stdout.read())
-        sys.exit(1)
     output = proc.stdout.read()
+    if proc.returncode != 0:
+        write_err(output)
+        raise Abort()
 
     if verbose:
         sys.stderr.write(output)
@@ -83,24 +92,22 @@ def run_or_exit(cmd, verbose=False):
     return output
 
 
-def find_index_url(req_file):
+def find_index_urls(req_file):
     finder = FakeFinder()
     for _ in parse_requirements(req_file, finder=finder):
         pass
     return finder.output()
 
 
-def generate(req_file, python, verbose):
+def install_and_freeze(req_file, python=None, verbose=False):
     # make temp virtualenv
     if python is not None:
         python = ['--python', python]
     else:
         python = []
 
-    index_url_lines = find_index_url(req_file)
-
     with tempdir() as path:
-        run = partial(run_or_exit, verbose=verbose)
+        run = partial(run_or_abort, verbose=verbose)
 
         run(['virtualenv'] + python + [path])
 
@@ -110,19 +117,27 @@ def generate(req_file, python, verbose):
         pinned = itertools.ifilterfalse(SKIP.match, pinned)
         pinned = sorted(pinned, key=lambda req: req.lower())
 
-        return [HEADER] + index_url_lines + pinned
+        return pinned
+
+
+def generate(args):
+    if not os.path.exists(args.requirements):
+        write_err('No such file: {}'.format(args.requirements))
+        raise Abort()
+
+    index_url_lines = find_index_urls(args.requirements)
+    pinned = install_and_freeze(args.requirements, args.python, args.verbose)
+
+    print HEADER
+    print
+    print '\n'.join(index_url_lines)
+    print
+    print '\n'.join(pinned)
 
 
 def main():
     args = parse_cmdline()
-
-    if not os.path.exists(args.requirements):
-        write_err('No such file: {}'.format(args.requirements))
+    try:
+        generate(args)
+    except Abort:
         sys.exit(1)
-
-    output = generate(args.requirements, args.python, args.verbose)
-    print '\n'.join(output)
-
-
-if __name__ == '__main__':
-    main()
