@@ -80,14 +80,18 @@ def write_err(text):
 
 def run_or_abort(cmd, verbose=False):
     proc = Popen(cmd, stdout=PIPE)
-    proc.wait()
-    output = proc.stdout.read()
-    if proc.returncode != 0:
+    output = []
+    for line in iter(proc.stdout.readline, ''):
+        output.append(line)
+        if verbose:
+            sys.stderr.write(line)
+
+    output = ''.join(output)
+
+    proc.communicate()  # close stdout. wait for proc to exit
+    if proc.returncode != 0 and not verbose:
         write_err(output)
         raise Abort()
-
-    if verbose:
-        sys.stderr.write(output)
 
     return output
 
