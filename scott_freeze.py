@@ -2,9 +2,7 @@ from contextlib import contextmanager
 
 import argparse
 from functools import partial
-import itertools
 import os
-import re
 import shutil
 from subprocess import Popen, PIPE
 import sys
@@ -22,8 +20,6 @@ HEADER = """# Generated file. Please do not edit manually
 # Example
 #     $ scott-freeze requirements.in > requirements.txt
 #"""
-
-SKIP = re.compile('^(argparse|distribute|wsgiref)==')
 
 
 class Abort(Exception):
@@ -117,8 +113,7 @@ def install_and_freeze(req_file, python=None, verbose=False):
 
         pip_path = os.path.join(path, 'bin', 'pip')
         run([pip_path, 'install', '-r', req_file])
-        pinned = run([pip_path, 'freeze']).splitlines()
-        pinned = itertools.ifilterfalse(SKIP.match, pinned)
+        pinned = run([pip_path, 'freeze', '-l']).splitlines()
         pinned = sorted(pinned, key=lambda req: req.lower())
 
         return pinned
