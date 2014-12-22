@@ -36,3 +36,9 @@ Version control
 
 We recommend that you keep both ``requirements.in`` and ``requirements.txt``
 in your repo.
+
+
+License
+-------
+
+Apache 2.0. See LICENSE for details.
