@@ -1,12 +1,12 @@
-#!/usr/bin/env python
-from setuptools import setup, find_packages
-from codecs import open  # To use a consistent encoding
-from os import path
+from setuptools import setup
+import os
 
+def read_file(*paths):
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, *paths)) as f:
+        return f.read()
 
-setup_dir = path.dirname(path.abspath(__file__))
-with open(path.join(setup_dir, 'README.rst'), encoding='utf-8') as handle:
-    long_description = handle.read()
+long_description = read_file('README.rst')
 
 
 setup(
@@ -17,7 +17,7 @@ setup(
     author='onefinestay',
     author_email='engineering@onefinestay.com',
     url='http://github.com/onefinestay/scott-freeze',
-    packages=find_packages(exclude=['test', 'test.*']),
+    py_modules=['scott_freeze'],
     entry_points={
         'console_scripts': [
             'scott-freeze=scott_freeze:main',
@@ -30,8 +30,6 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX",
         "Programming Language :: Python :: 2.7",
-        "Topic :: Internet",
-        "Topic :: Software Development :: Libraries :: Python Modules",
         "Intended Audience :: Developers",
     ]
 )
