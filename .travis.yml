@@ -1,17 +1,15 @@
 language: python
 
-python:
-  - '2.7'
-  - '3.3'
-  - '3.4'
+env:
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py34
 
 install:
-  - python setup.py -q install
-  - pip install -r test_requirements.txt
+  - pip install tox
 
 script:
-  - coverage run --source scott_freeze -m pytest tests.py
-  - coverage report -m
+    tox
 
 notifications:
   email: false
