@@ -1,0 +1,34 @@
+language: python
+
+python:
+  - '2.7'
+  - '3.3'
+  - '3.4'
+
+install:
+  - python setup.py -q install
+  - pip install -r test_requirements.txt
+
+script:
+  - coverage run --source scott_freeze -m pytest tests.py
+  - coverage report -m
+
+notifications:
+  email: false
+  hipchat:
+    rooms:
+      secure: HdQuYHfBbCnuw0mgj1tJOdlXRhF+b9Ena6JVp1nPdCjP5WX8iCpDAtR4vlTry4X6eNXodb0xsdhWmN9Zq+iDvR0FQvvtRkFUxNpxsqGPLClvUIthTNqjGLgl2lMtbZcHRT1dj/wrKY/yAVdGs/FF/Ghz0MQZgiWtGA5hnb3kZAI=
+    format: html
+    template:
+    - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
+      (<a href="%{build_url}">Details</a>/<a href="%{compare_url}">Diff</a>)'
+
+# deploy:
+  # provider: pypi
+  # user: onefinestay
+  # password:
+    # secure: hZIfC73CpSfVgRTiDxxXeJraDuUeoUaGfApKdsXgZf/7gX+yeYPPowzww5JI+7nZw63muq7T5k4+PsVIfBvyRnUZJjXX0DbAWVx++J74ps7iOy0hxUn5dgQXqb0C3WpC0gcLBN+cYP5vrHVCxxHotpkEEs5TtXbbFExDr4oNpTc=
+  # on:
+    # tags: true
+    # all_branches: true
+    # repo: onefinestay/scott-freeze
