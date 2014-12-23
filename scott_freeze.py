@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from contextlib import contextmanager
 
 import argparse
@@ -61,8 +63,8 @@ def write_err(text):
 def run_or_abort(cmd, verbose=False):
     proc = Popen(cmd, stdout=PIPE)
     output = []
-    for line in iter(proc.stdout.readline, ''):
-        output.append(line)
+    for line in iter(proc.stdout.readline, b''):
+        output.append(line.decode('utf-8'))
         if verbose:
             sys.stderr.write(line)
 
@@ -117,11 +119,11 @@ def generate(args):
     index_url_lines = find_index_urls(args.requirements)
     pinned = install_and_freeze(args.requirements, args.python, args.verbose)
 
-    print HEADER
-    print
-    print '\n'.join(index_url_lines)
-    print
-    print '\n'.join(pinned)
+    print(HEADER)
+    print()
+    print('\n'.join(index_url_lines))
+    print()
+    print('\n'.join(pinned))
 
 
 def main():
