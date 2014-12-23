@@ -8,8 +8,6 @@ from subprocess import Popen, PIPE
 import sys
 import tempfile
 
-from pip.req import parse_requirements
-
 
 HEADER = """# Generated file. Please do not edit manually
 #
@@ -24,20 +22,6 @@ HEADER = """# Generated file. Please do not edit manually
 
 class Abort(Exception):
     pass
-
-
-class FakeFinder(object):
-    index_urls = []
-
-    def output(self):
-        lines = []
-        # first one is main, subsequent are 'extra'
-        param = '--index-url'
-        for url in self.index_urls:
-            lines.append('{}={}'.format(param, url))
-            param = '--extra-index-url'
-
-        return lines
 
 
 def setup_argparse():
@@ -93,10 +77,16 @@ def run_or_abort(cmd, verbose=False):
 
 
 def find_index_urls(req_file):
-    finder = FakeFinder()
-    for _ in parse_requirements(req_file, finder=finder):
-        pass
-    return finder.output()
+    found = []
+    with open(req_file) as handle:
+        for line in handle:
+            line = line.strip()
+            if line.startswith('-i') or line.startswith('--index-url'):
+                found.append(line)
+            elif line.startswith('--extra-index-url'):
+                found.append(line)
+
+    return found
 
 
 def install_and_freeze(req_file, python=None, verbose=False):
